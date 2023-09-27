@@ -7,6 +7,6 @@ const routes = new Router();
 
 routes.get("/usuarios", usuariosController.listarUsuarios)
 routes.post('/usuario', usuariosController.criarUsuario)
-routes.get("/usuario/:username", usuariosController.listarUserPorId)
+routes.get("/usuario/:id", usuariosController.listarUserPorId)
 
 export default routes;
