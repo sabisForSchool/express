@@ -19,6 +19,16 @@ class usuarioController{
         usuariosCadastrados[id] = req.body
         return res.status(200).send({message:"user atualizado"})
     }
+    static deletar(req, res){
+        const id = req.params.id
+        if(usuariosCadastrados.length >= id && id>=0){
+            usuariosCadastrados.splice(id, 1)
+            return res.status(200).send({message:"usuário deletado"})
+        }else{
+            return res.status(200).send({message:"usuário não existe"})
+        }
+        return res.status(200).send({message:"erro ao deletar user"})
+    }
 }
 //faça uma função pra atualizar 
 export default usuarioController
