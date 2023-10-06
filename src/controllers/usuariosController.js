@@ -1,65 +1,54 @@
-import {v4 as uuidv4} from "uuid"
-const usuariosCadastrados = []
+import UserModel from "../models/Usuario.js"
 
 class usuarioController{
     static criarUsuario(req, res){
         const novoUser = req.body
-        novoUser.id = uuidv4()
-        usuariosCadastrados.push(novoUser)
+        UserModel.save(novoUser.name, novoUser.username, novoUser.password)
+        
         return res.status(201).send({message:"usuário criado"})
     }
     static listarUsuarios(req, res){
-        if(usuariosCadastrados.length == 0){
-            return res.status(404).send({message:"sem usuários cadastrados"})
+        const users = UserModel.show()
+        if(!users){
+            return res.status(404).send({message: "Não há users cadastrados"})
         }
-        return res.status(200).send(usuariosCadastrados)
+        return res.status(200).send(users)
     }
     static listarUserPorId(req, res){
         const id = req.params.id
-        const user = usuariosCadastrados.find((user) => user.id == id)
+        const user = UserModel.findById(id)
+
         if(user){
             return res.status(200).send(user)
-        }else{
-            return res.status(404).send({message: "usuário não existe"})
         }
+        return res.status(404).send({message: "usuário não encontrado"})
         
     }
     static atualizarUser(req, res){
         const id = req.params.id
-        let user = usuariosCadastrados.find((user) => user.id == id)
-
-        if(user){
-            const index = usuariosCadastrados.indexOf(user)
-            //testes para garantir  ue a requisição tem todos os dados
-            if(!req.body.name){
-                return res.status(500).send({message: "o campo name é obrigatório, caso não queira mudá-lo coloque o valor antigo"})
-            }
-            else if(!req.body.senha){
-                return res.status(500).send({message: "o campo senha é obrigatório, caso não queira mudá-lo coloque o valor antigo"})
-            }
-            else if(!req.body.username){
-                return res.status(500).send({message: "o campo username é obrigatório, caso não queira mudá-lo coloque o valor antigo"})
-            }else{//possui todos os dados
-                usuariosCadastrados[index].name = req.body.name
-                usuariosCadastrados[index].senha = req.body.senha
-                usuariosCadastrados[index].username = req.body.username
-                return res.status(200).send({message:"user atualizado"})
-            }
-        }else{
-            return res.status(404).send({message:"usuárionão encontrado"})
+        if(!req.body.name){
+            return res.status(422).send({message:"O campo NAME é obrigatório"})
         }
+        if(!req.body.username){
+            return res.status(422).send({message:"o campo USERNAME é obrigatório"})
+        }
+        if(!req.body.password){
+            return res.status(422).send({message:"o campo PASSWORD é obrigatório"})
+        }
+
+        const user = UserModel.update(id, req.body)
+        if(!user){
+            return res.status(404).send({message:"usuário não encontrado"})
+        }
+        return res.status(200).send({message:`usuário atualizado com sucesso`})
         
     }
     static deletar(req, res){
         const id = req.params.id
-        const user = usuariosCadastrados.find((user) => user.id === id)
-        if(user){
-            const index = usuariosCadastrados.indexOf(user)
-            usuariosCadastrados.splice(index, 1)
-            return res.status(200).send({message: "usuário deletado"})
-        }else{
-            return res.status(404).send({message: "usuário não encontrado"})
+        if(!UserModel.destroy(id)){
+            return res.status(200).send({message: "usuário não encontrado"})
         }
+        return res.status(200).send({message: "usuário deletado com sucesso"})
         
     }
 }
